@@ -1,6 +1,7 @@
 package com.malinghan.maconfig.server.controller;
 
 import com.malinghan.maconfig.server.common.Result;
+import com.malinghan.maconfig.server.model.ConfigHistory;
 import com.malinghan.maconfig.server.service.ConfigsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +21,9 @@ public class ConfigsController {
     public ResponseEntity<Result<Map<String, String>>> getConfigs(
             @RequestParam String app,
             @RequestParam String env,
-            @RequestParam String ns) {
-        Map<String, String> configs = configsService.getConfigs(app, env, ns);
+            @RequestParam String ns,
+            @RequestParam(defaultValue = "false") boolean inherit) {
+        Map<String, String> configs = configsService.getConfigsWithInherit(app, env, ns, inherit);
         long version = configsService.getVersion(app, env, ns);
         return ResponseEntity.ok()
                 .header("X-Version", String.valueOf(version))
@@ -72,5 +74,43 @@ public class ConfigsController {
     @GetMapping("/apps")
     public Result<List<String>> getAllApps() {
         return Result.ok(configsService.getAllApps());
+    }
+
+    @GetMapping("/history")
+    public Result<List<ConfigHistory>> getHistory(
+            @RequestParam String app,
+            @RequestParam String env,
+            @RequestParam String ns,
+            @RequestParam(required = false) String pkey) {
+        return Result.ok(configsService.getHistory(app, env, ns, pkey));
+    }
+
+    @PostMapping("/rollback")
+    public Result<Void> rollback(@RequestParam long historyId) {
+        try {
+            configsService.rollback(historyId);
+            return Result.ok();
+        } catch (IllegalArgumentException e) {
+            return Result.error(404, e.getMessage());
+        }
+    }
+
+    @GetMapping("/export")
+    public Result<Map<String, String>> export(
+            @RequestParam String app,
+            @RequestParam String env,
+            @RequestParam String ns) {
+        return Result.ok(configsService.exportConfigs(app, env, ns));
+    }
+
+    @PostMapping("/import")
+    public Result<Void> importConfigs(
+            @RequestParam String app,
+            @RequestParam String env,
+            @RequestParam String ns,
+            @RequestParam(defaultValue = "overwrite") String conflictPolicy,
+            @RequestBody Map<String, String> configs) {
+        configsService.importConfigs(app, env, ns, configs, conflictPolicy);
+        return Result.ok();
     }
 }

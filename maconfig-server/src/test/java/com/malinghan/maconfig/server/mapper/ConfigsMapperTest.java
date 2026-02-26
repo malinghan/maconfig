@@ -11,7 +11,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @MybatisTest
-@Sql("/schema.sql")
+@Sql("/test-schema.sql")
 class ConfigsMapperTest {
 
     @Autowired

@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS configs;
 DROP TABLE IF EXISTS locks;
+DROP TABLE IF EXISTS config_history;
 
 CREATE TABLE configs (
     app        VARCHAR(64)  NOT NULL,

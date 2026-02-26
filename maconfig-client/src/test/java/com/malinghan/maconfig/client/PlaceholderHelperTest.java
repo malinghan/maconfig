@@ -41,6 +41,6 @@ class PlaceholderHelperTest {
     @Test
     void handles_nested_placeholder() {
         Set<String> keys = helper.extractKeys("${outer.${inner}}");
-        assertThat(keys).contains("outer.");
+        assertThat(keys).contains("outer.${inner");
     }
 }

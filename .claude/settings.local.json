@@ -4,7 +4,9 @@
       "Bash(./mvnw compile -q 2>&1 | tail -50)",
       "Bash(./mvnw compile -q 2>&1 | tail -20)",
       "Bash(./mvnw compile -pl maconfig-server -am 2>&1 | tail -30)",
-      "Bash(./mvnw compile -pl maconfig-server -am 2>&1 | tail -15)"
+      "Bash(./mvnw compile -pl maconfig-server -am 2>&1 | tail -15)",
+      "Bash(./mvnw clean package -DskipTests 2>&1 | tail -30)",
+      "Bash(git commit -m \"$\\(cat <<'EOF'\nfeat: 实现 v2.0 可靠性增强\n\nS2-1: 版本号持久化 - configs 表增加 updated_at 字段，/v1/version 改为查询 MAX\\(updated_at\\)，移除 VersionHolder 内存维护\nS2-2: 客户端启动容错 - server 不可用时降级使用本地默认值，支持 fail-fast=false，轮询失败静默重试\nS2-3: 配置删除支持 - 新增 DELETE /v1/configs 接口\nS2-4: 查询接口增强 - 新增 GET /v1/configs/{pkey}、GET /v1/apps，响应加 X-Version 头\nS2-5: 日志规范化 - 统一 [MACONFIG] 前缀，仅在版本变化或异常时输出日志\nS2-6: 单元测试 - ConfigsMapper、DistributedLocks、PlaceholderHelper、calcChangedKeys、Demo 集成测试\n\nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }
