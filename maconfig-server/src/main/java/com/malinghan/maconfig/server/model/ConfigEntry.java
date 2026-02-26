@@ -9,4 +9,5 @@ public class ConfigEntry {
     private String ns;
     private String pkey;
     private String pval;
+    private long updatedAt;
 }

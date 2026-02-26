@@ -69,9 +69,9 @@ public class SpringValueProcessor implements BeanPostProcessor, ApplicationListe
             Object value = convertValue(resolved, field.getType());
             ReflectionUtils.makeAccessible(field);
             field.set(bean, value);
-            log.info("Updated field " + bean.getClass().getSimpleName() + "." + field.getName() + " = " + value);
+            log.info("[MACONFIG] updated " + bean.getClass().getSimpleName() + "." + field.getName() + " = " + value);
         } catch (Exception e) {
-            log.severe("Failed to update field " + bean.getClass().getSimpleName() + "." + field.getName() + ": " + e.getMessage());
+            log.severe("[MACONFIG] failed to update " + bean.getClass().getSimpleName() + "." + field.getName() + ": " + e.getMessage());
         }
     }
 

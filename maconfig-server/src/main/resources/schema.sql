@@ -2,11 +2,12 @@ DROP TABLE IF EXISTS configs;
 DROP TABLE IF EXISTS locks;
 
 CREATE TABLE configs (
-    app   VARCHAR(64)  NOT NULL,
-    env   VARCHAR(64)  NOT NULL,
-    ns    VARCHAR(64)  NOT NULL,
-    pkey  VARCHAR(128) NOT NULL,
-    pval  TEXT,
+    app        VARCHAR(64)  NOT NULL,
+    env        VARCHAR(64)  NOT NULL,
+    ns         VARCHAR(64)  NOT NULL,
+    pkey       VARCHAR(128) NOT NULL,
+    pval       TEXT,
+    updated_at BIGINT       NOT NULL DEFAULT 0,
     PRIMARY KEY (app, env, ns, pkey)
 );
 

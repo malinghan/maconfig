@@ -16,19 +16,25 @@ import java.util.logging.Logger;
 public class MaConfigServiceImpl implements ApplicationContextAware, InitializingBean, DisposableBean, RepositoryChangeListener {
 
     private static final Logger log = Logger.getLogger(MaConfigServiceImpl.class.getName());
+    private static final String PREFIX = "[MACONFIG] ";
 
     private final ConfigMeta meta;
+    private final boolean failFast;
     private MaRepository repository;
     private volatile Map<String, String> configMap = new ConcurrentHashMap<>();
     private volatile long localVersion = 0L;
-    private final List<RepositoryChangeListener> listeners = new CopyOnWriteArrayList<>();
     private ScheduledExecutorService scheduler;
 
     @Setter
     private ApplicationContext applicationContext;
 
     public MaConfigServiceImpl(ConfigMeta meta) {
+        this(meta, false);
+    }
+
+    public MaConfigServiceImpl(ConfigMeta meta, boolean failFast) {
         this.meta = meta;
+        this.failFast = failFast;
     }
 
     @Override
@@ -38,12 +44,14 @@ public class MaConfigServiceImpl implements ApplicationContextAware, Initializin
             Map<String, String> initial = repository.getConfigs(meta);
             configMap = new ConcurrentHashMap<>(initial);
             localVersion = repository.getVersion(meta);
-            log.info("MaConfig loaded " + initial.size() + " keys for " + meta.getApp() + "/" + meta.getEnv() + "/" + meta.getNs());
+            log.info(PREFIX + "loaded " + initial.size() + " keys for "
+                    + meta.getApp() + "/" + meta.getEnv() + "/" + meta.getNs());
         } catch (Exception e) {
-            log.warning("MaConfig initial load failed, will retry in poll: " + e.getMessage());
+            if (failFast) {
+                throw new RuntimeException(PREFIX + "initial load failed (fail-fast=true)", e);
+            }
+            log.warning(PREFIX + "initial load failed, using local defaults. Cause: " + e.getMessage());
         }
-
-        listeners.add(this);
 
         scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r, "maconfig-poller");
@@ -61,18 +69,15 @@ public class MaConfigServiceImpl implements ApplicationContextAware, Initializin
                 Set<String> changedKeys = calcChangedKeys(configMap, newConfigs);
                 configMap = new ConcurrentHashMap<>(newConfigs);
                 localVersion = remoteVersion;
-                log.info("MaConfig detected changes, changed keys: " + changedKeys);
+                log.info(PREFIX + "version changed to " + remoteVersion + ", changed keys: " + changedKeys);
                 publishChange(changedKeys);
-                for (RepositoryChangeListener listener : listeners) {
-                    listener.onChange(newConfigs);
-                }
             }
         } catch (Exception e) {
-            log.warning("MaConfig poll failed: " + e.getMessage());
+            log.warning(PREFIX + "poll failed, will retry. Cause: " + e.getMessage());
         }
     }
 
-    private Set<String> calcChangedKeys(Map<String, String> oldMap, Map<String, String> newMap) {
+    Set<String> calcChangedKeys(Map<String, String> oldMap, Map<String, String> newMap) {
         Set<String> changed = new HashSet<>();
         for (Map.Entry<String, String> entry : newMap.entrySet()) {
             if (!Objects.equals(oldMap.get(entry.getKey()), entry.getValue())) {
@@ -95,7 +100,7 @@ public class MaConfigServiceImpl implements ApplicationContextAware, Initializin
 
     @Override
     public void onChange(Map<String, String> newConfigs) {
-        // self-listener: configMap already updated in poll()
+        // no-op: configMap already updated in poll()
     }
 
     public Map<String, String> getConfigMap() {
