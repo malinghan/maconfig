@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: maconfig-demo
+server:
+  port: 8080
+demo:
+  message: Hello World (local default)
+  version: "1.0-local"

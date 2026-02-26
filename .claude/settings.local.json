@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./mvnw compile -q 2>&1 | tail -50)",
+      "Bash(./mvnw compile -q 2>&1 | tail -20)",
+      "Bash(./mvnw compile -pl maconfig-server -am 2>&1 | tail -30)",
+      "Bash(./mvnw compile -pl maconfig-server -am 2>&1 | tail -15)"
+    ]
+  }
+}

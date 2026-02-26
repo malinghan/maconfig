@@ -1,0 +1,17 @@
+### Write configs
+POST http://localhost:9091/v1/configs?app=demo-app&env=dev&ns=default
+Content-Type: application/json
+
+{
+  "demo.message": "Hello from maconfig!",
+  "demo.version": "2.0"
+}
+
+### Read configs
+GET http://localhost:9091/v1/configs?app=demo-app&env=dev&ns=default
+
+### Get version
+GET http://localhost:9091/v1/version?app=demo-app&env=dev&ns=default
+
+### Server status
+GET http://localhost:9091/v1/status
